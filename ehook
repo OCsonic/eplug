@@ -1,21 +1,11 @@
 #!/bin/bash
-PORTAGE_DIR="/etc/portage" # Just defining this as a variable incase you're on a system where for some reason portage configuration isn't located in /etc/portage
-
-exechooks() {
-	PORTAGE_SUBDIR="$1"
-	SCRIPT_DIR="${PORTAGE_DIR}/${PORTAGE_SUBDIR}/${CATEGORY}/${PN}"
-	if [ -d "${SCRIPT_DIR}" ]; then
-		if compgen -G "${SCRIPT_DIR}/*"; then
-			for scripts in "${SCRIPT_DIR}/"*; do
-				bash "$scripts"
-			done
-		else
-			einfo "This package has an directory in $PORTAGE_SUBDIR but no hooks are inside!"
-		fi
+SCRIPT_DIR="${1%/*}/package.hook/${EBUILD_PHASE}/${CATEGORY}/${PN}"
+if [ -d "${SCRIPT_DIR}" ]; then
+	if compgen -G "${SCRIPT_DIR}/*"; then
+		for scripts in "${SCRIPT_DIR}/"*; do
+			bash "$scripts"
+		done
+	else
+		einfo "Directory \"${SCRIPT_DIR}\" exists but no hooks are inside!"
 	fi
-}
-
-case "$EBUILD_PHASE" in
-        postinst) exechooks "postmerge.d" ;;
-        *) : ;;
-esac
+fi
