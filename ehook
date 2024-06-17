@@ -1,11 +1,13 @@
 #!/bin/bash
-SCRIPT_DIR="${1%/*}/package.hook/${EBUILD_PHASE}/${CATEGORY}/${PN}"
-if [ -d "${SCRIPT_DIR}" ]; then
-	if compgen -G "${SCRIPT_DIR}/*"; then
-		for scripts in "${SCRIPT_DIR}/"*; do
-			bash "$scripts"
+SCRIPT_DIR="${1%/*}/package.hook/${EBUILD_PHASE}/${CATEGORY}/${PN}" # This magic gets the current portage config dir
+if [ -d "${SCRIPT_DIR}" ]; then # Check if the package has a directory for scripts yet
+	if compgen -G "${SCRIPT_DIR}/*"; then # Check if theres anything in there
+		for scripts in "${SCRIPT_DIR}/"*; do # Loop through whatever is there
+			if [ -f "$scripts" ]; then # Don't try executing it if it's not a file
+				bash "$scripts"
+			fi
 		done
 	else
-		einfo "Directory \"${SCRIPT_DIR}\" exists but no hooks are inside!"
+		einfo "Directory \"${SCRIPT_DIR}\" exists but no hooks are inside!" # Extra notice so people get reminded to clean up empy hook directories
 	fi
 fi
