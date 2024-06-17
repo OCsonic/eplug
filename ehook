@@ -1,5 +1,5 @@
 #!/bin/bash
-SCRIPT_DIR="${1%/*}/package.hook/${EBUILD_PHASE}/${CATEGORY}/${PN}" # This magic gets the current portage config dir
+SCRIPT_DIR="${1%/*}/package.hook/${CATEGORY}/${PN}/${EBUILD_PHASE}" # This magic gets the current portage config dir and sets where to read scripts from.
 if [ -d "${SCRIPT_DIR}" ]; then # Check if the package has a directory for scripts yet
 	if compgen -G "${SCRIPT_DIR}/*"; then # Check if theres anything in there
 		for scripts in "${SCRIPT_DIR}/"*; do # Loop through whatever is there
