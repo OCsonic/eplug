@@ -1,0 +1,14 @@
+trigger_phase=postinst
+
+einfo "Updating grub config"
+GRUB_CFG="/boot/grub/grub.cfg"
+if [ -f "${GRUB_CFG}_9" ]; then rm "${GRUB_CFG}_9"; fi 
+if compgen -G "${GRUB_CFG}_*" > /dev/null; then
+	for backup in `ls ${GRUB_CFG}_* | sort -g -r`; do
+		mv "$backup" "${backup%%[0-9]}$((${backup##${backup%%[0-9]}} + 1))"
+	done
+fi
+if [ -f "${GRUB_CFG}" ]; then
+	mv "${GRUB_CFG}" "${GRUB_CFG}_0"
+fi
+grub-mkconfig -o "$GRUB_CFG"

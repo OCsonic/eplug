@@ -1,0 +1,4 @@
+trigger_phase=postinst
+
+einfo "Updating initramfs with user settings"
+dracut "/boot/initramfs-${PV}.img" --kver ${PV} --force

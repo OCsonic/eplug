@@ -1,0 +1,2 @@
+einfo "Replacing outdated unified kernel image"
+dracut "/boot/gentoo.efi" --kver ${PV} --uefi --uefi-stub="/boot/vmlinuz-${PV}" --force

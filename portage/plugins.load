@@ -1,0 +1,8 @@
+# This file does not support inline comments, put comments on their own line.
+
+# For people using ehook prior to the new system, you can just rename "package.hook" to "hook"
+#  and enable the legacy ehook plugin and disable the new ehook plugin. The legacy plugin will
+#  continue to be supported as it is the reference implementation for "type 3" configuration
+#  based plugins.
+#legacy/ehook
+#ehook

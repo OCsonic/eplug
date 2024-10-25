@@ -1,0 +1,33 @@
+#!/bin/bash
+##########################################################
+###      ###   ##   ###         ###         ###   ###  ###
+###   ######   ##   ###   ###   ###   ###   ###   #   ####
+###      ###        ###   ###   ###   ###   ###       ####
+###   ######   ##   ###   ###   ###   ###   ###   #    ###
+###      ###   ##   ###         ###         ###   ##   ###
+##########################################################
+##########################################################
+###                                                    ###
+###        ehook legacy version 1.1 by Basil :3        ###
+###    This is the original version of ehook ported    ###
+###    to run under Basil's portage plugin manager!    ###
+###     This plugin is the reference implementation    ###
+###      for "type 3" configuration based plugins      ###
+###                                                    ###
+##########################################################
+config_name=hook
+config_style=3
+
+main() {
+	if [[ "${pluginCurConfigDir}/${EBUILD_PHASE}" == "${1}" ]]; then
+		if compgen -G "${1}/*"; then
+			for scripts in "${1}/"*; do
+				if [ -f "$scripts" ]; then
+					bash "$scripts"
+				fi
+			done
+		else
+			einfo "Directory \"${1}\" exists but no hooks are inside!"
+		fi
+	fi
+}

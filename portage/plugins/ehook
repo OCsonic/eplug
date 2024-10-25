@@ -1,0 +1,30 @@
+#!/bin/bash
+##############################################################
+###      ###   ##   ###         ###         ###   ###  #######
+####   ######   ##   ###   ###   ###   ###   ###   #   #######
+#####      ###        ###   ###   ###   ###   ###       ######
+######   ######   ##   ###   ###   ###   ###   ###   #    ####
+#######      ###   ##   ###         ###         ###   ##   ###
+##############################################################
+##############################################################
+###                                                        ###
+###                ehook rewrite by Basil :3               ###
+###  The first plugin for Basil's portage plugin manager.  ###
+###   This plugin serves as the reference implementation   ###
+###        for "type 2" configuration based plugins        ###
+###                                                        ###
+##############################################################
+config_name=ehook
+config_style=2
+
+main() {
+	localvar $(cat "$1" | head -1)
+	if [ ! "$trigger_phase" ]; then eerror "hook is missing trigger_phase on line 1!" && die; fi
+	infoDbg " Current hook: $1"
+	infoDbg "   Current phase: ${EBUILD_PHASE}"
+	infoDbg "   Trigger phase: ${trigger_phase}"
+	if [[ "${EBUILD_PHASE}" == "${trigger_phase}" ]]; then
+		infoLog "${config_name}: running hook ${1##*/}..."
+		bash "$1"
+	fi
+}
