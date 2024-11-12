@@ -1,0 +1,13 @@
+#!/bin/sh
+# Set up import function then load the env cleaner
+import() {
+	if [ "$(head -1 "$portageDir/core/$1")" == "#!/bin/sh" ]; then
+		infoDbg "Importing shell component $1"
+		source "$portageDir/core/$1"
+	else
+		infoDbg "Importing binary component $1"
+		"$portageDir/core/$1"
+	fi
+}
+import libraries/envcleaner
+globalvar portageDir="$portageDir"

@@ -1,0 +1,41 @@
+#!/bin/sh
+## Overcomplicated system to allow for automatic variable unsetting
+##  this system exists to avoid poisoning the portage environment unintentionally
+##  think like rust, but... bash
+
+# Define ephemeral variables
+globalvar() { export $@ && export UNSET_GLOBAL_LIST="${@%%=*} $UNSET_GLOBAL_LIST" && infoDbg " Global variable \"${@%%=*}\" set!"; }
+localvar() { export $@ && export UNSET_LIST="${@%%=*} $UNSET_LIST" && infoDbg " Plugin variable \"${@%%=*}\" set!"; }
+alias localarr="local"
+
+# Nuke variables
+envcleaner() {
+	case $1 in 
+		--local)
+			infoDbg " Cleaning local environment..."
+			unset -v config_name
+			unset -v config_style
+			UNSET_LIST=($UNSET_LIST)
+			for variable in "${UNSET_LIST[@]}"; do
+				unset -v "$variable"
+				infoDbg "  Local variable \"$variable\" unset!"
+			done
+			infoDbg " Local evironment cleaned!"
+		;;
+		--global)
+			infoDbg " Cleaning global environment..."
+			UNSET_GLOBAL_LIST=($UNSET_GLOBAL_LIST)
+			for variable in "${UNSET_GLOBAL_LIST[@]}"; do
+				unset -v "$variable"
+				infoDbg "  Global variable \"$variable\" unset!"
+			done
+			infoDbg " Global evironment cleaned!"
+		;;
+		--finalize)
+			unset -v "TIMER_START"
+			unset -v "TIMER_STOP"
+			unset "UNSET_LIST"
+			unset "UNSET_GLOBAL_LIST"
+		;;
+	esac
+}

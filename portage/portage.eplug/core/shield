@@ -1,0 +1,14 @@
+#!/bin/sh
+# Make sure not to execute any non-bash components during phases that disallow external binaries
+if [[ "${EBUILD_PHASE}" == "depend" ]] || [ ! "${EBUILD_PHASE}" ]; then
+	infoDbg "Not currently inside a safe ebuild phase, this plugin load wont be timed due external commands not being allowed while sourcing ebuilds."
+	alias date="test"
+	infoDbg "Due to external commands not being allowed in this step, we're setting timer stop and start to 1 so the message below should say it took 0 seconds to load plugins."
+	TIMER_START="1"
+	TIMER_STOP="1"
+else
+	infoDbg "Current phase is ${EBUILD_PHASE}"
+fi
+if [[ "${EBUILD_PHASE}" == "depend" ]]; then
+	infoLog "Calculating dependencies for ${P}..."
+fi

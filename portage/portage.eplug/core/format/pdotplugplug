@@ -1,0 +1,25 @@
+#!/bin/sh
+localvar pluginCurPackagedotDir="${portageDir}/package.${config_name}"
+localvar pluginCurConfigDir="${portageDir}/${config_name}"
+if [ -d ${pluginCurPackagedotDir} ]; then
+	for packagedot in "${pluginCurPackagedotDir}"/*; do
+		while read packagedotEntry; do
+			if [[ ! ${packagedotEntry:0:1} =~ ^(#|"")$ ]] ; then
+				localarr currentLine=($packagedotEntry)
+				if compgen -G "/var/db/repos/*/${currentLine[0]}/" > /dev/null; then # TODO improve implementation to support more specific package atoms
+					if [[ "${CATEGORY}/${PN}" == "${currentLine[0]}" ]]; then
+						for packageAtomConf in "${currentLine[@]:1}"; do
+							if [ -f "${pluginCurConfigDir}/${packageAtomConf}" ]; then
+								main "${pluginCurConfigDir}/${packageAtomConf}" # The plugin needs to determine what to do with the conf file
+							else
+								eerror " invalid configuration file \"${packageAtomConf}\""
+							fi
+						done
+					fi
+				else
+					eerror " invalid package atom \"${currentLine[0]}\""
+				fi
+			fi
+		done < "${packagedot}"
+	done
+fi

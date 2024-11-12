@@ -1,1 +1,1 @@
-PLUGMAN_LOGS=1 PLUGMAN_DEBUG=0 source /etc/portage/portage.eplug/eplug
+PLUGMAN_LOG=1 source /etc/portage/portage.eplug/eplug

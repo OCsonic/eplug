@@ -1,0 +1,4 @@
+#!/bin/sh
+## Functions and variables mainly for use inside plugins
+# variables for plugin loading
+globalvar pluginDir="${portageDir}/plugins"

@@ -1,148 +1,41 @@
 #!/bin/bash
+infoDbg() { if [[ $PLUGMAN_LOG > "4" ]]; then einfo "${@}"; fi; }
+portageDir="${1%/*}/portage.eplug" source "${1%/*}/portage.eplug/core/libraries/core"
 
-## Set up the scripting environment
-# Prevent external commands from running if we're in a phase where that's not allowed
-infoDbg() { if [[ $PLUGMAN_DEBUG == "1" ]]; then einfo "${@}"; fi; }
-infoDbg "Current phase is ${EBUILD_PHASE}"
-if [[ "${EBUILD_PHASE}" == "depend" ]] || [ ! "${EBUILD_PHASE}" ]; then
-	infoDbg "Not currently inside a safe ebuild phase, this plugin load wont be timed due external commands not being allowed while sourcing ebuilds."
-	alias date="test"
-	infoDbg "Due to external commands not being allowed in this step, we're setting timer stop and start to 1 so the message below should say it took 0 seconds to load plugins."
-	TIMER_START="1"
-	TIMER_STOP="1"
-fi
-infoLog() { if [[ $PLUGMAN_LOGS == "1" ]]; then einfo "${@}"; fi; }
-if [[ "${EBUILD_PHASE}" == "depend" ]]; then
-	infoLog "Calculating dependencies for ${P}..."
-fi
-# Early Functions
-localvar() { export $@ && export UNSET_LIST="${@%%=*} $UNSET_LIST" && infoDbg " Plugin variable \"${@%%=*}\" set!"; }
-globalvar() { export $@ && export UNSET_GLOBAL_LIST="${@%%=*} $UNSET_GLOBAL_LIST" && infoDbg " Global variable \"${@%%=*}\" set!"; }
-alias localarr="local"
-infoDbg "Preparing plugin environment..."
-if [ ! "${TIMER_START}" ]; then
-	local TIMER_START="$(date +%s)" # This single variable gets spared from the wrath of the env cleaner
-fi
-# Directories
-globalvar portageDir="${1%/*}/portage.eplug"
-globalvar pluginDir="${portageDir}/plugins"
-# Variables & Arrays
-readarray -t pluginLst < "${portageDir}/plugins.load"
+import functions/logging	# infoLog and other info functions
+import functions/plugins	# functions for the actual plugin-loading portion
+import shield			# protects from accidentally running external commands in disallowed ebuild phases
 
+# Start timing execution
+if [ ! "${TIMER_START}" ]; then local TIMER_START="$(date +%s)"; fi
 
-## Begin loading plugins
-# Loop through plugins
 infoDbg "Loading plugins..."
+readarray -t pluginLst < "${portageDir}/plugins.load"
 for pluginCur in "${pluginLst[@]}"; do
 	if [[ ! ${pluginCur:0:1} =~ ^(#|"")$ ]] ; then
-		# Set up local scripting environment
+		# If plugin exists then load it
 		localvar pluginCurScr="${pluginDir}/${pluginCur}"
 		if [ -f "${pluginCurScr}" ]; then
 			infoDbg " Loading plugin ${pluginCur}..."
-			## Load the actual plugin file
-			# Read the plugin
 			source "${pluginCurScr}"
-			# Define configuration styles
 			if [ ! "${config_name}" ]; then eerror " plugin \"${pluginCur}\" is missing config_name" && die; fi
 			if [ ! "${config_style}" ]; then eerror " plugin \"${pluginCur}\" is missing config_style" && die; fi
 			case "${config_style}" in
-				1) # package.use style
-					localvar pluginCurPackagedotDir="${portageDir}/package.${config_name}"
-					if [ -d ${pluginCurPackagedotDir} ]; then
-						for packagedot in "${pluginCurPackagedotDir}"/*; do
-							while read packagedotEntry; do
-								if [[ ! ${packagedotEntry:0:1} =~ ^(#|"")$ ]] ; then
-									localarr currentLine=($packagedotEntry)
-									if compgen -G "/var/db/repos/*/${currentLine[0]}/" > /dev/null; then # TODO improve implementation to support more specific package atoms
-										if [[ "${CATEGORY}/${PN}" == "${currentLine[0]}" ]]; then
-											for packageAtomConf in "${currentLine[@]:1}"; do
-												main "${packageAtomConf}" # The plugin needs to handle each package argument individually
-											done
-										fi
-									else
-										eerror " invalid package atom \"${currentLine[0]}\""
-									fi
-								fi
-							done < "${packagedot}"
-						done
-					fi
-				;;
-				2) # package.env + env style
-					localvar pluginCurPackagedotDir="${portageDir}/package.${config_name}"
-					localvar pluginCurConfigDir="${portageDir}/${config_name}"
-					if [ -d ${pluginCurPackagedotDir} ]; then
-						for packagedot in "${pluginCurPackagedotDir}"/*; do
-							while read packagedotEntry; do
-								if [[ ! ${packagedotEntry:0:1} =~ ^(#|"")$ ]] ; then
-									localarr currentLine=($packagedotEntry)
-									if compgen -G "/var/db/repos/*/${currentLine[0]}/" > /dev/null; then # TODO improve implementation to support more specific package atoms
-										if [[ "${CATEGORY}/${PN}" == "${currentLine[0]}" ]]; then
-											for packageAtomConf in "${currentLine[@]:1}"; do
-												if [ -f "${pluginCurConfigDir}/${packageAtomConf}" ]; then
-													main "${pluginCurConfigDir}/${packageAtomConf}" # The plugin needs to determine what to do with the conf file
-												else
-													eerror " invalid configuration file \"${packageAtomConf}\""
-												fi
-											done
-										fi
-									else
-										eerror " invalid package atom \"${currentLine[0]}\""
-									fi
-								fi
-							done < "${packagedot}"
-						done
-					fi
-				;;
-				3) # patches style
-					localvar pluginCurConfigDir="${portageDir}/${config_name}/${CATEGORY}/${PN}"
-					if [ -d "${pluginCurConfigDir}" ]; then
-						if compgen -G "${pluginCurConfigDir}/*" > /dev/null; then
-							for pluginConf in "${pluginCurConfigDir}/"*; do
-								main "$pluginConf" # The plugin needs to determine what to do with the given current package directory
-							done
-						else
-							einfo " directory \"${SCRIPT_DIR}\" exists but nothing is inside!"
-						fi
-					fi
-				;;
-				*)
-					eerror " config style \"${config_style}\" is not valid!"
-					die
-				;;
+				1) import format/pdotplug	;; # package.use style
+				2) import format/pdotplugplug	;; # package.env + env style
+				3) import format/plug		;; # patches style
+				*) eerror " config style \"${config_style}\" is not valid!" && die ;;
 			esac
 			infoDbg "Plugin \"${pluginCur}\" loaded!"
 		else
 			eerror "Plugin \"${pluginCur}\" does not exist!" && die
 		fi
-		## Funny hack to make sure the environment is clean before handing the wheel back to portage :P
-		# Convert the psuedo-array to a bash array
-		infoDbg " Cleaning plugin environment..."
-		UNSET_LIST=($UNSET_LIST)
-		# Unset every variable in array
-		for variable in "${UNSET_LIST[@]}"; do
-			unset -v "$variable"
-			infoDbg "   Plugin variable \"$variable\" unset!"
-		done
-		infoDbg " Plugin evironment cleaned!"
+		envcleaner --plugin
 	fi
 done
-# Unsetting the plugin config vars since we're done loading new plugins
-unset -v config_name
-unset -v config_style
-infoDbg "Cleaning global environment..."
-UNSET_GLOBAL_LIST=($UNSET_GLOBAL_LIST)
-# Unset every variable in array
-for variable in "${UNSET_GLOBAL_LIST[@]}"; do
-	unset -v "$variable"
-	infoDbg " Global variable \"$variable\" unset!"
-done
-infoDbg "Global evironment cleaned!"
-if [ ! "${TIMER_STOP}" ]; then
-	local TIMER_STOP="$(date +%s)"
-fi
+envcleaner --global
+
+# Stop timing execution
+if [ ! "${TIMER_STOP}" ]; then local TIMER_STOP="$(date +%s)"; fi
 infoDbg "Plugin execution completed in $((${TIMER_STOP}-${TIMER_START})) seconds!"
-# Unset the remaining variables set at the beginning
-unset -v "TIMER_START"
-unset -v "TIMER_STOP"
-unset "UNSET_LIST"
-unset "UNSET_GLOBAL_LIST"
+envcleaner --finalize

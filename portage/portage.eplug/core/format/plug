@@ -1,0 +1,11 @@
+#!/bin/sh
+localvar pluginCurConfigDir="${portageDir}/${config_name}/${CATEGORY}/${PN}"
+if [ -d "${pluginCurConfigDir}" ]; then
+	if compgen -G "${pluginCurConfigDir}/*" > /dev/null; then
+		for pluginConf in "${pluginCurConfigDir}/"*; do
+			main "$pluginConf" # The plugin needs to determine what to do with the given current package directory
+		done
+	else
+		einfo " directory \"${SCRIPT_DIR}\" exists but nothing is inside!"
+	fi
+fi
