@@ -1,8 +1,6 @@
 # eplug (README UNDER CONSTRUCTION)
 ## Intro
-eplug is a plug manager for portage that allows you to make portage do what you want it to a little bit easier!
-
-This project is still heavily work-in-progress and a ebuild for this should soon be available in basil-overlay!
+eplug is a plugin manager for portage that allows you to make portage do what you want it to a little bit easier!
 
 ## Usage
 You can install eplug from [basil-overlay](https://codeberg.org/BasilBasil/basil-overlay)
