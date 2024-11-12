@@ -1,6 +1,7 @@
 #!/bin/bash
 infoDbg() { if [[ $PLUGMAN_LOG > "4" ]]; then einfo "${@}"; fi; }
-portageDir="${1%/*}/portage.eplug" source "${1%/*}/portage.eplug/core/libraries/core"
+export portageDir="${1%/*}/portage.eplug"
+source "$portageDir/core/libraries/core"
 
 import functions/logging	# infoLog and other info functions
 import functions/plugins	# functions for the actual plugin-loading portion
