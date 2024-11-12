@@ -1,6 +1,9 @@
 #!/bin/sh
+
 ## Debug Logging
+
 # Default Level (PLUGMAN_LOG=1 or higher)
 infoLog() { if [[ $PLUGMAN_LOG > "0" ]]; then einfo "${@}"; fi; }
+
 # Max Level (PLUGMAN_LOG=5)
-#refer to functions/core for this one
+#refer to the main eplug file for this one

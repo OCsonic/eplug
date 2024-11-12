@@ -1,4 +1,9 @@
 #!/bin/sh
+
+## This format is for plugins that utilize the package.use style of formatting
+##  for each package atom in package.<plugin_name> we pass each argument to the plugin
+##  then each argument is handled however the plugin sees fit
+
 localvar pluginCurPackagedotDir="${portageDir}/package.${config_name}"
 if [ -d ${pluginCurPackagedotDir} ]; then
 	for packagedot in "${pluginCurPackagedotDir}"/*; do

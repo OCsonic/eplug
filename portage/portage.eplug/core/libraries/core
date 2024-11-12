@@ -1,4 +1,7 @@
 #!/bin/sh
+
+## Core functions to make plugin manager less location-dependent
+
 # Set up import function then load the env cleaner
 import() {
 	if [ "$(head -1 "$portageDir/core/$1")" == "#!/bin/sh" ]; then
@@ -10,4 +13,3 @@ import() {
 	fi
 }
 import libraries/envcleaner
-globalvar portageDir="$portageDir"

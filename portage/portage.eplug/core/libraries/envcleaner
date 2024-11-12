@@ -1,4 +1,5 @@
 #!/bin/sh
+
 ## Overcomplicated system to allow for automatic variable unsetting
 ##  this system exists to avoid poisoning the portage environment unintentionally
 ##  think like rust, but... bash

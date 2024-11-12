@@ -1,4 +1,7 @@
 #!/bin/sh
+
+## Basic component to prevent portage errors
+
 # Make sure not to execute any non-bash components during phases that disallow external binaries
 if [[ "${EBUILD_PHASE}" == "depend" ]] || [ ! "${EBUILD_PHASE}" ]; then
 	infoDbg "Not currently inside a safe ebuild phase, this plugin load wont be timed due external commands not being allowed while sourcing ebuilds."

@@ -1,4 +1,10 @@
 #!/bin/sh
+
+## This format is for plugins that utilize the patches style of formatting
+##  for each package we recursively read through the contents of the plugin directory
+##  <plugin_name>/<package_category>/<package_name>/* and then pass it to the plugin
+##  as an argument, then each argument is handled however the plugin sees fit
+
 localvar pluginCurConfigDir="${portageDir}/${config_name}/${CATEGORY}/${PN}"
 if [ -d "${pluginCurConfigDir}" ]; then
 	if compgen -G "${pluginCurConfigDir}/*" > /dev/null; then
