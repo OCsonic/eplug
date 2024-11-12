@@ -1,1 +1,1 @@
-PLUGMAN_DEBUG=0 source /etc/portage/eplug
+PLUGMAN_DEBUG=0 source /etc/portage/portage.eplug/eplug
