@@ -24,7 +24,7 @@ if [ ! "${TIMER_START}" ]; then
 	local TIMER_START="$(date +%s)" # This single variable gets spared from the wrath of the env cleaner
 fi
 # Directories
-globalvar portageDir="${1%/*}/plugman-latest"
+globalvar portageDir="${1%/*}/portage.eplug"
 globalvar pluginDir="${portageDir}/plugins"
 # Variables & Arrays
 readarray -t pluginLst < "${portageDir}/plugins.load"
