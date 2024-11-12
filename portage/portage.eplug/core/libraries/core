@@ -4,7 +4,7 @@
 
 # Set up import function then load the env cleaner
 import() {
-	if [ "$(head -1 "$portageDir/core/$1")" == "#!/bin/sh" ]; then
+	if [ "$(mapfile -tn "1" shebang < "$portageDir/core/$1" && printf "$shebang")" == "#!/bin/sh" ]; then
 		infoDbg "Importing shell component $1"
 		source "$portageDir/core/$1"
 	else
